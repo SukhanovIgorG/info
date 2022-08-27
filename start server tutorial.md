@@ -2,15 +2,16 @@
 
 Несколько популярных решений облачных серверов:
 
-Amazon Web Services,
-Google Compute Cloud,
-[Яндекс.Облако.](https://cloud.yandex.ru/services/compute) <= (клик)
+* Amazon Web Services,
+* Google Compute Cloud,
+* [Яндекс.Облако.](https://cloud.yandex.ru/services/compute) <= (клик)
 
 - создать аккаунт
 - создать платежный аккаунт 
 - создать виртуальную машину на Ubuntu 20.04
-  * важно  указать SSH ключ совпадающий с ключом для Git
+  !! важно  указать SSH ключ совпадающий с ключом для Git !!
   (храниться SSH в /Users/*you*/.ssh)
+
   <details>
   <summary>если SSH ране не создавался:</summary>
   <br>
@@ -18,13 +19,16 @@ Google Compute Cloud,
         У публичного расширение .pub, у приватного расширения нет.
         Оба ключа сохранятся на вашем компьютере.
         В строке e-mail адрес почты, которая привязанной к GutHub:
+
         $ ssh-keygen -t rsa -b 4096 -C "****@yandex.ru"
         
         После ввода отобразится сообщение:
+
         > Generating public/private rsa key pair.
 
       2. Укажите место хранения ключей.
         Простой вариант — сделать домашний каталог пользователя путём по умолчанию. Для этого нажмите Enter: (macOS)
+
         > Enter a file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
 
       3. Создайте пароль доступа к SSH-ключу. Его нужно вводить при каждом        
@@ -35,21 +39,45 @@ Google Compute Cloud,
         > Enter same passphrase again: [Type passphrase again]
 
       4. Запустите фоном команду ssh-agent. Она ищет SSH-ключ на вашем компьютере:
+
         $ eval $(ssh-agent -s)
 
       5. Привяжите приватный ключ к ssh-agent.
         Тогда вы сможете не вводить пароль при каждой работе с   репозиторием:
+
         $ ssh-add ~/.ssh/id_rsa
 
       6. Привязка SSH-ключа к аккаунту GitHub
       Скопируйте публичный ключ в буфер обмена: (macOS)
+
         $ pbcopy < ~/.ssh/id_rsa.pub
         (или найдите файл /Users/*you*/.ssh и скопируйте от туда)
 
         Далее acount -> setings -> SSH and GPG keys -> new SSH key )
   </br>
   </details>
-  (  
+ 
 - После нажать ВМ
+  Ждем пока статус смениться на Running (1-5 мин)
+
+- Подключение к серверу
+  Чтобы подключиться к серверу, понадобится публичный IP и логин, который мы указали при создании виртуальной машины.
+  Скопируйте публичный IP, зайдите в командную строку и введите команду (замените login и 84.201.130.70 на свои логин и IP):
+
+  $ ssh login@84.201.130.70
+
+  Если это первое подключение к серверу, вы увидите фразу:
+
+  The authenticity of host '84.201.130.70 (84.201.130.70)' can't be established.
+  ECDSA key fingerprint is SHA256:gGz1AULJpNptRRaqLz2FQTDf/IRxSGPA0vvmmXWy/6I.
+  Are you sure you want to continue connecting (yes/no)? 
+
+  Введите “yes” и нажмите Enter.
+  Введите пароль приватного ключа если он есть и снова нажмите Enter.
+  Если пароль правильный, вы окажетесь на удалённом сервере:
+
+- Если все выполено верно - вы на сервере! 
+- выйти из сервера Ctrl+D.
+
 
 

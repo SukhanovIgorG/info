@@ -11,7 +11,7 @@ Google Compute Cloud,
 - создать виртуальную машину на Ubuntu 20.04
   !! важно  указать SSH ключ совпадающий с ключом для Git !!
   (храниться SSH в /Users/*you*/.ssh)
-
+## Доступ по SSH
   <details>
   <summary>если SSH ране не создавался:</summary>
   <br>

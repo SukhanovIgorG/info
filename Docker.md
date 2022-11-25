@@ -266,8 +266,6 @@ pbcopy < ~/.ssh/id_rsa.pub
 
 Переходим по адресу IP адресу публичной сети:
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8badc49e-3be1-4573-861f-f08c77ff8633/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8badc49e-3be1-4573-861f-f08c77ff8633/Untitled.png)
-
 Открываем в браузере IP
 
 # PDF версия

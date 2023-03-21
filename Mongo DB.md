@@ -291,6 +291,105 @@
 ### Инициализация
 
   <details>
+    <summary>Конфиг .env</summary>
+    <br>
+
+    # MONGODB TESTSERVER
+
+    MONGODB_USER_DEV= "root"
+    MONGODB_PASSWORD_DEV= "example"
+    MONGODB_DBNAME_DEV= "development"
+    MONGODB_PROTOCOL_DEV= "mongodb:"
+    MONGODB_HOST_DEV= "94.26.226.9:27017"
+    MONGODB_QUERY_DEV= "authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+
+  </details>
+
+  <details>
+    <summary>Конфиг ДБ mongoDBConfig.js</summary>
+    <br>
+
+      const common = {
+          dbNameStatistics: process.env.MONGODB_STATISTICS_COLLECTION,
+          dbNameMonitoring: process.env.MONGODB_MONITORING_COLLECTION
+      };
+
+      const dev = {
+          dbUser: process.env.MONGODB_USER_DEV,
+          dbPassword: process.env.MONGODB_PASSWORD_DEV,
+          dbName: process.env.MONGODB_DBNAME_DEV,
+          dbProtocol: process.env.MONGODB_PROTOCOL_DEV,
+          dbHost: process.env.MONGODB_HOST_DEV,
+          dbQuery: process.env.MONGODB_QUERY_DEV,
+          dbNameStatistics: common.dbNameStatistics,
+          dbNameMonitoring: common.dbNameMonitoring
+      };
+
+      const prod = {
+          dbUser: process.env.MONGODB_USER,
+          dbPassword: process.env.MONGODB_PASSWORD,
+          dbName: process.env.MONGODB_DBNAME,
+          dbProtocol: process.env.MONGODB_PROTOCOL,
+          dbHost: process.env.MONGODB_HOST,
+          dbQuery: process.env.MONGODB_QUERY,
+          dbNameStatistics: common.dbNameStatistics,
+          dbNameMonitoring: common.dbNameMonitoring
+      };
+
+      module.exports = {
+          dev,
+          prod
+      };
+
+  </details>
+
+  <details>
+    <summary>Приложение app.js</summary>
+    <br>
+
+      const express = require("express");
+      const mongoose = require("mongoose");
+      const expressSession = require("express-session");
+      const MongoStore = require("connect-mongo")(expressSession);
+      const Connector = require("./backend/helpers/db/Connector.js");
+      const nadModels = require("./backend/models/nad.js");
+      const router = require("./backend/router");
+      const connector = new Connector();
+
+      global.nad = {
+        models: {},
+      };
+
+      const appInit = () =>
+        new Promise((resolve, reject) => {
+          preloader([connector.connect()])
+            .then((message) => {
+              nadModels.setModels(connector.connection);
+              const app = express();
+
+              app.use(
+                expressSession({
+                  secret: "neuro AD my super key",
+                  resave: false,
+                  saveUninitialized: false,
+                  store: new MongoStore({ mongooseConnection: connector.connection }),
+                })
+              );
+
+              router(app);
+
+              resolve(app);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+
+      module.exports = appInit;
+
+  </details>
+
+  <details>
     <summary>Коннектор Connector.js</summary>
     <br>
 
@@ -366,58 +465,203 @@
   </details>
 
   <details>
-    <summary>Конфиг ДБ mongoDBConfig.js</summary>
+    <summary>Модель nad.js</summary>
     <br>
 
-      const common = {
-          dbNameStatistics: process.env.MONGODB_STATISTICS_COLLECTION,
-          dbNameMonitoring: process.env.MONGODB_MONITORING_COLLECTION
-      };
+    const CategorySchema = require("../modelSchemas/guide/category.js");
+    const UserSchema = require("../modelSchemas/users/userWithSectionsAccess.js");
+    const createModels = require("./createModels.js");
 
-      const dev = {
-          dbUser: process.env.MONGODB_USER_DEV,
-          dbPassword: process.env.MONGODB_PASSWORD_DEV,
-          dbName: process.env.MONGODB_DBNAME_DEV,
-          dbProtocol: process.env.MONGODB_PROTOCOL_DEV,
-          dbHost: process.env.MONGODB_HOST_DEV,
-          dbQuery: process.env.MONGODB_QUERY_DEV,
-          dbNameStatistics: common.dbNameStatistics,
-          dbNameMonitoring: common.dbNameMonitoring
-      };
+    const createModels = function (connection, schemas, models = {}) {
+      if (!connection) {
+          return console.error(`${this.name}() "connection" parameter is missing.`)
+      }
 
-      const prod = {
-          dbUser: process.env.MONGODB_USER,
-          dbPassword: process.env.MONGODB_PASSWORD,
-          dbName: process.env.MONGODB_DBNAME,
-          dbProtocol: process.env.MONGODB_PROTOCOL,
-          dbHost: process.env.MONGODB_HOST,
-          dbQuery: process.env.MONGODB_QUERY,
-          dbNameStatistics: common.dbNameStatistics,
-          dbNameMonitoring: common.dbNameMonitoring
-      };
+      if (!schemas || typeof schemas !== 'object') {
+          return console.error(`${this.name}() "schemas" parameter is missing or not correct.`);
+      }
 
-      module.exports = {
-          dev,
-          prod
-      };
+      const result = models;
+
+      Object.keys(schemas).forEach((key) => {
+          const modelName = key;
+          const schema = schemas[key];
+
+          if (!result[modelName]) {
+              result[modelName] = connection.model(modelName, schema);
+          }
+      });
+
+      return result;
+    };
+
+    const NadModels = class {
+      constructor() {
+        if (global.nad.models instanceof NadModels) {
+          return global.nad.models;
+        }
+
+        global.nad.models = this;
+
+        this.connection = null;
+        this.models = {
+          Category: null,
+          User: null,
+        };
+      }
+
+      setModels(connection) {
+        if (!this.connection && connection) {
+          this.connection = connection;
+        }
+        const schemas = {
+          Category: CategorySchema,
+          User: UserSchema,
+        };
+
+        createModels(this.connection, schemas, this.models);
+      }
+
+      get User() {
+        return this.models.User;
+      }
+    };
+
+    module.exports = new NadModels();
 
   </details>
-
   <details>
-    <summary>Конфиг .env</summary>
-    <br>
+    <summary>Схема UserShema.js</summary>
 
-    # MONGODB TESTSERVER
+    const { Schema } = require("mongoose");
+    const passportLocalMongoose = require("passport-local-mongoose");
 
-    MONGODB_USER_DEV= "root"
-    MONGODB_PASSWORD_DEV= "example"
-    MONGODB_DBNAME_DEV= "development"
-    MONGODB_PROTOCOL_DEV= "mongodb:"
-    MONGODB_HOST_DEV= "94.26.226.9:27017"
-    MONGODB_QUERY_DEV= "authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+    const UserWithSectionsAccessSchema = new Schema(
+        {
+            godMode: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            username: {
+                type: String,
+                unique: true,
+                required: true,
+            },
+            name: {
+                type: String,
+                required: true,
+            },
+            email: {
+                type: String,
+                required: true,
+                validator: function (v) {
+                    return /\S+@\S+\.\S+/.test(v);
+                },
+                message: (props) => `${props.value} is not a valid email!`,
+            },
+            password: String,
+            sectionsAccess: {
+                type: Object,
+                default: {},
+            },
+            lock: {
+                type: Boolean,
+                required: false,
+                default: false, //это пока. Возможность блокировки пользователя.
+            },
+            alarm: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            photo: {
+                type: String,
+                required: false,
+            },
+            referer: {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+                required: true,
+            },
+            registrationIp: {
+                type: String,
+                required: true,
+            },
+        },
+        { timestamps: true, minimize: false }
+    );
+
+    UserWithSectionsAccessSchema.virtual("user_places", {
+        ref: "UserPlace",
+        localField: "_id",
+        foreignField: "user",
+    });
+
+    UserWithSectionsAccessSchema.plugin(passportLocalMongoose);
+
+    module.exports = UserWithSectionsAccessSchema;
 
   </details>
 
 ### Схемы
 
 ### Контроллеры
+
+#### Поиск, операции, сохранение
+
+Задача: Найти все карты, в которых использовалась area с типом "some-type" и заменить там значения fill, stroke, type
+
+      // функция производящая необходимые изменения
+      // в данном случае ищет поле по заданному значению targetValue
+      // и заменяет внутри объекта значения заданных полей на новые переданные ей
+
+      function replaceObjectValue(
+        obj,
+        targetValue,
+        newValue1,
+        newValue2,
+        newValue3
+      ) {
+        for (var key in obj) {
+          if (typeof obj[key] === "object") {
+            replaceObjectValue(
+              obj[key],
+              targetValue,
+              newValue1,
+              newValue2,
+              newValue3
+            );
+          } else if (obj[key] === targetValue) {
+            obj.fill = newValue1;
+            obj.stroke = newValue2;
+            obj.type = newValue3;
+          }
+        }
+      }
+
+      // ищем все документы по заданным параметрам
+      const updateAreasInMaps = await nadModels.Maps.find({
+        place: req.currentPlace._id,
+        areas: {
+          $exists: true,
+        },
+      });
+
+      // ко всем найденным документам применяем функцию изменяющую данные
+      for (let i = 0; i < updateAreasInMaps.length; i++) {
+        const map = updateAreasInMaps[i];
+        replaceObjectValue(
+          map.areas,
+          "some-type",
+          fill,
+          stroke,
+          newType
+        );
+
+      // !! если были изменены поля внутри объекта, нужно явно сообщить об этом !!
+      map.markModified("areas");
+
+      // После всех необходимых операций над объектами производится сохранение
+      await map.save();
+    }

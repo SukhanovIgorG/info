@@ -291,6 +291,52 @@
 ### Инициализация
 
   <details>
+    <summary>Приложение app.js</summary>
+    <br>
+
+      const express = require("express");
+      const mongoose = require("mongoose");
+      const expressSession = require("express-session");
+      const MongoStore = require("connect-mongo")(expressSession);
+      const Connector = require("./backend/helpers/db/Connector.js");
+      const nadModels = require("./backend/models/nad.js");
+      const router = require("./backend/router");
+      const connector = new Connector();
+
+      global.nad = {
+        models: {},
+      };
+
+      const appInit = () =>
+        new Promise((resolve, reject) => {
+          preloader([connector.connect()])
+            .then((message) => {
+              nadModels.setModels(connector.connection);
+              const app = express();
+
+              app.use(
+                expressSession({
+                  secret: "neuro AD my super key",
+                  resave: false,
+                  saveUninitialized: false,
+                  store: new MongoStore({ mongooseConnection: connector.connection }),
+                })
+              );
+
+              router(app);
+
+              resolve(app);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+
+      module.exports = appInit;
+
+  </details>
+
+  <details>
     <summary>Коннектор Connector.js</summary>
     <br>
 

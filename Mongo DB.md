@@ -290,6 +290,134 @@
 
 ### Инициализация
 
+  <details>
+    <summary>Коннектор Connector.js</summary>
+    <br>
+
+    const mongoose = require("mongoose");
+    const mongoDBConfig = require("../../configs/mongoDBConfig.js");
+
+    const Connector = class {
+        constructor(options = {}) {
+            this.isDev = process.env.NODE_ENV === "development";
+            this.connection = null;
+
+            this.connect = this.connect.bind(this);
+
+            this.mergeOptions(options);
+        }
+
+        mergeOptions(options) {
+            const { dbUser, dbPassword, dbName, dbProtocol, dbHost, dbQuery } = this.isDev
+                ? mongoDBConfig.dev
+                : mongoDBConfig.prod;
+
+            this.dbUser = options.dbUser || dbUser;
+            this.dbPassword = options.dbPassword || dbPassword;
+            this.dbName = options.dbName || dbName;
+            this.dbProtocol = options.dbProtocol || dbProtocol;
+            this.dbHost = options.dbHost || dbHost;
+            this.dbQuery = options.dbQuery || dbQuery;
+        }
+
+        connect() {
+            return new Promise((resolve, reject) => {
+                const { dbUser, dbPassword, dbName, dbProtocol, dbHost, dbQuery } = this;
+                const mongoDBHref = `${dbProtocol}//${dbUser}:${dbPassword}@${dbHost}/${dbName}?${dbQuery}`;
+                const hiddenPassword = dbPassword ? "***" : "";
+                const noPassHref = `${dbProtocol}//${dbUser}:${hiddenPassword}@${dbHost}/${dbName}?${dbQuery}`;
+                const options = {
+                    useNewUrlParser: true,
+                    useCreateIndex: true,
+                    useFindAndModify: false,
+                    useUnifiedTopology: true,
+                    promiseLibrary: global.Promise,
+                    poolSize: 5,
+                    socketTimeoutMS: 30000,
+                    family: 4,
+                    // authSource: dbName
+                };
+
+                this.connection = mongoose.createConnection(mongoDBHref, options);
+
+                this.connection
+                    .once("open", () => {
+                        console.log("Open connect to mongo server:", noPassHref);
+
+                        resolve();
+                    })
+                    .on("connected", () => {
+                        console.log("Connected to mongo server:", noPassHref);
+                    })
+                    .on("disconnected", () => {
+                        console.log("Disconnected from mongo server:", noPassHref);
+                    })
+                    .on("error", () => {
+                        console.error(`MongoDB error for connection: ${noPassHref}`);
+
+                        reject();
+                    });
+            });
+        }
+    };
+
+    module.exports = Connector;
+
+  </details>
+
+  <details>
+    <summary>Конфиг ДБ mongoDBConfig.js</summary>
+    <br>
+
+      const common = {
+          dbNameStatistics: process.env.MONGODB_STATISTICS_COLLECTION,
+          dbNameMonitoring: process.env.MONGODB_MONITORING_COLLECTION
+      };
+
+      const dev = {
+          dbUser: process.env.MONGODB_USER_DEV,
+          dbPassword: process.env.MONGODB_PASSWORD_DEV,
+          dbName: process.env.MONGODB_DBNAME_DEV,
+          dbProtocol: process.env.MONGODB_PROTOCOL_DEV,
+          dbHost: process.env.MONGODB_HOST_DEV,
+          dbQuery: process.env.MONGODB_QUERY_DEV,
+          dbNameStatistics: common.dbNameStatistics,
+          dbNameMonitoring: common.dbNameMonitoring
+      };
+
+      const prod = {
+          dbUser: process.env.MONGODB_USER,
+          dbPassword: process.env.MONGODB_PASSWORD,
+          dbName: process.env.MONGODB_DBNAME,
+          dbProtocol: process.env.MONGODB_PROTOCOL,
+          dbHost: process.env.MONGODB_HOST,
+          dbQuery: process.env.MONGODB_QUERY,
+          dbNameStatistics: common.dbNameStatistics,
+          dbNameMonitoring: common.dbNameMonitoring
+      };
+
+      module.exports = {
+          dev,
+          prod
+      };
+
+  </details>
+
+  <details>
+    <summary>Конфиг .env</summary>
+    <br>
+
+    # MONGODB TESTSERVER
+
+    MONGODB_USER_DEV= "root"
+    MONGODB_PASSWORD_DEV= "example"
+    MONGODB_DBNAME_DEV= "development"
+    MONGODB_PROTOCOL_DEV= "mongodb:"
+    MONGODB_HOST_DEV= "94.26.226.9:27017"
+    MONGODB_QUERY_DEV= "authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+
+  </details>
+
 ### Схемы
 
 ### Контроллеры

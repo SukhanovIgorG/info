@@ -20,7 +20,7 @@
 
 ## Лекции
 
-- [ ] Лекция 1: «Сложность, тестирование, особые случаи»: [Youtube](https://www.youtube.com/watch?v=QLhqYNsPIVo&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5)
+- [x] Лекция 1: «Сложность, тестирование, особые случаи»: [Youtube](https://www.youtube.com/watch?v=QLhqYNsPIVo&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5)
 
 - [ ] Лекция 2: «Линейный поиск»: [Youtube](https://www.youtube.com/watch?v=SKwB41FrGgU&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=2)
 

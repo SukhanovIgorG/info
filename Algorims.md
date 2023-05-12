@@ -24,7 +24,7 @@
 
 - [x] Лекция 2: «Линейный поиск»: [Youtube](https://www.youtube.com/watch?v=SKwB41FrGgU&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=2)
 
-- [ ] Лекция 3: «Множества»: [Youtube](https://www.youtube.com/watch?v=PUpmV2ieIHA&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=3)
+- [x] Лекция 3: «Множества»: [Youtube](https://www.youtube.com/watch?v=PUpmV2ieIHA&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=3)
 
 - [ ] Лекция 4: «Словари и сортировка подсчётом»: [Youtube](https://www.youtube.com/watch?v=Nb5mW1yWVSs&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=4)
 

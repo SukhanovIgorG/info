@@ -26,7 +26,7 @@
 
 - [x] Лекция 3: «Множества»: [Youtube](https://www.youtube.com/watch?v=PUpmV2ieIHA&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=3)
 
-- [ ] Лекция 4: «Словари и сортировка подсчётом»: [Youtube](https://www.youtube.com/watch?v=Nb5mW1yWVSs&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=4)
+- [x] Лекция 4: «Словари и сортировка подсчётом»: [Youtube](https://www.youtube.com/watch?v=Nb5mW1yWVSs&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=4)
 
 - [ ] Лекция 5: «Префиксные суммы и два указателя»: [Youtube](https://www.youtube.com/watch?v=de28y8Dcvkg&list=PL6Wui14DvQPySdPv5NUqV3i8sDbHkCKC5&index=6)
 
